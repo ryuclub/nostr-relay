@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  my-nostr-relay:
+    build: .
+    container_name: nostr-relay
+    ports:
+      - "8383:8383"
+    restart: always
