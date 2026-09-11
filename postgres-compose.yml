@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-relay_db}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-***REMOVED***}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?需在 .env 或环境变量中设置}
       - PGDATA=/var/lib/postgresql/data
     ports:
       - "5432:5432"

@@ -49,12 +49,13 @@ func main() {
 	relay := khatru.NewRelay()
 
 	// 基本信息配置
-	relay.Info.Name = "Injapan Relay"
+	relay.Info.Name = "Helios Relay"
 	relay.Info.PubKey = "b81e6789a2c789751125c1e7872c30e9f7bcc4c19faebe9f948bc8d8ec680d45"
-	relay.Info.Icon = "https://injapan.toratech.jp/injapan/img/logo.png"
-	relay.Info.Description = "最日 Nostr 中继站点 (测试)"
+	relay.Info.Description = "海米 Nostr 中继站点 (测试)"
 	relay.Info.Version = "2026.1.15.1"
-	relay.Info.Banner = "https://injapan.toratech.jp/upload/file/20250707/scaled_Image_175185105788020250707101856_sl.png"
+	relay.Info.Icon = "https://sun.29t.com/icons/app-icon.png"
+	// Banner 为 NIP-11 可选字段，新品牌素材就位后再填（旧地址已失效，留空好过死链）
+	// relay.Info.Banner = "https://sun.29t.com/..."
 	relay.Info.Software = "https://github.com/fiatjaf/khatru"
 	relay.Info.Contact = "mailto:45online@gmail.com"
 	// relay.Info.NIPs = []int{1, 2, 9, 11, 12, 15, 16, 20, 22, 33, 40, 42, 50}
@@ -64,10 +65,11 @@ func main() {
 	})
 	//https://nostr.watch/relays/wss/relay.29t.com
 
-	// 建议从环境变量读取数据库连接，方便 Docker 部署
+	// 数据库连接必须由环境变量提供，不设默认值（避免把凭证写进仓库）
+	//   例: DATABASE_URL=postgresql://postgres:<password>@127.0.0.1:5432/relay_db?sslmode=disable
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		dsn = "postgresql://postgres:***REMOVED***@172.17.0.1:5432/relay_db?sslmode=disable"
+		panic("需要设置环境变量 DATABASE_URL")
 	}
 
 	db := postgresql.PostgresBackend{DatabaseURL: dsn}
@@ -160,23 +162,23 @@ func main() {
 				fmt.Printf("[%s] [TAGS] : %s\n", time.Now().Format("15:04:05"), event.Tags)
 			}
 			for _, tag := range event.Tags {
-				// 标签名 "t"，值是 "injapan"
-				if len(tag) >= 2 && tag[0] == "t" && (tag[1] == "injapan" || tag[1] == "29t") {
+				// 标签名 "t"：helios 为当前值；injapan / 29t 是历史 tag，保留以兼容存量客户端
+				if len(tag) >= 2 && tag[0] == "t" && (tag[1] == "helios" || tag[1] == "injapan" || tag[1] == "29t") {
 					hasAppTag = true
 					break
 				}
 			}
 			if !hasAppTag {
-				fmt.Printf("[%s] [BLOCKED] 拒绝外来帖子 PubKey: %s (缺少 ['t', 'injapan'] 标签)\n%d:%s\n%s\n",
+				fmt.Printf("[%s] [BLOCKED] 拒绝外来帖子 PubKey: %s (缺少 ['t', 'helios'] 标签)\n%d:%s\n%s\n",
 					time.Now().Format("15:04:05"), event.PubKey, count, pubkeyList, event.Content)
-				return true, "this relay only accepts posts from Injapan App"
+				return true, "this relay only accepts posts from Helios App"
 			}
 		}
 		fmt.Printf("[%s] [SUCCESS] 允许存储事件: %d PubKey: %s\n%s\n", time.Now().Format("15:04:05"), event.Kind, event.PubKey, event.Content)
 		return false, ""
 	})
 
-	fmt.Printf(">>> 2026 Injapan Relay 系统启动成功 <<<\n")
+	fmt.Printf(">>> 2026 Helios Relay 系统启动成功 <<<\n")
 	fmt.Printf("运行模式: PostgreSQL 模式\n")
 	fmt.Printf("监听端口: 8383\n")
 	fmt.Println("-------------------------------------------")
